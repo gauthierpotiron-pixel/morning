@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Morning">
+<title>Morning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0e0f0c; --surface:#161714; --surface2:#1e1f1b;
+    --border:rgba(255,255,255,0.07); --text:#e8e6df; --muted:#7a7870;
+    --accent:#c8f060; --accent2:#f0b840; --accent3:#60c8f0; --danger:#f06060;
+    --radius:14px;
+    --font-display:'DM Serif Display',serif;
+    --font-body:'Syne',sans-serif;
+    --font-mono:'DM Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;min-height:100dvh;padding:0 0 60px}
+
+  .header{padding:52px 20px 20px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--border);position:relative}
+  .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 0%,rgba(200,240,96,.07),transparent 60%);pointer-events:none}
+  .greeting{font-family:var(--font-display);font-size:32px;line-height:1.1}
+  .greeting em{font-style:italic;color:var(--accent)}
+  .date-line{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.05em;text-transform:uppercase}
+  .live-time{font-family:var(--font-mono);font-size:28px;font-weight:500;letter-spacing:-.02em}
+
+  .race-banner{margin:12px 16px;background:linear-gradient(135deg,rgba(200,240,96,.08),rgba(240,184,64,.06));border:1px solid rgba(200,240,96,.2);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .race-countdown{font-family:var(--font-mono);font-size:32px;font-weight:500;color:var(--accent);line-height:1;min-width:52px}
+  .race-name{font-size:13px;font-weight:600}
+  .race-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;line-height:1.6}
+
+  .section{margin:12px 16px 0}
+  .section-title{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;padding-left:2px}
+
+  .weather-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px}
+  .weather-icon{font-size:36px;line-height:1}
+  .weather-main{flex:1}
+  .weather-temp{font-family:var(--font-display);font-size:28px;line-height:1}
+  .weather-desc{font-size:12px;color:var(--muted);margin-top:2px}
+  .weather-details{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.8}
+
+  .todo-list{display:flex;flex-direction:column;gap:6px}
+  .todo-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-user-select:none;user-select:none}
+  .todo-item.done{opacity:.45}
+  .todo-item.done .todo-text{text-decoration:line-through}
+  .todo-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+  .todo-item.done .todo-check{background:var(--accent);border-color:var(--accent)}
+  .todo-check svg{display:none}
+  .todo-item.done .todo-check svg{display:block}
+  .todo-text{font-size:14px;flex:1}
+  .todo-input-row{display:flex;gap:8px;margin-top:6px}
+  .todo-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none}
+  .todo-input:focus{border-color:rgba(200,240,96,.3)}
+  .todo-input::placeholder{color:var(--muted)}
+  .todo-add-btn{background:var(--accent);color:#0e0f0c;border:none;border-radius:10px;padding:10px 16px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer}
+  .todo-clear{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:right;margin-top:6px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+  .sport-list{display:flex;flex-direction:column;gap:6px}
+  .sport-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden}
+  .sport-card.live{border-color:rgba(240,96,96,.35)}
+  .sport-card.live::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--danger)}
+  .sport-emoji{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+  .sport-badge{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:3px 6px;border-radius:4px;background:var(--surface2);color:var(--muted);white-space:nowrap;flex-shrink:0}
+  .sport-badge.live-b{background:rgba(240,96,96,.15);color:var(--danger)}
+  .sport-badge.today-b{background:rgba(200,240,96,.1);color:var(--accent)}
+  .sport-badge.done-b{background:var(--surface2);color:var(--muted)}
+  .sport-teams{flex:1;min-width:0}
+  .sport-matchup{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sport-meta{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-mono)}
+  .sport-score{font-family:var(--font-mono);font-size:16px;font-weight:500;color:var(--accent2);white-space:nowrap}
+  .sport-next{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+
+  .news-list{display:flex;flex-direction:column;gap:6px}
+  .news-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;cursor:pointer;text-decoration:none;display:block}
+  .news-source{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent3);margin-bottom:4px}
+  .news-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.4}
+  .news-age{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:4px}
+
+  .card-empty{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;color:var(--muted);font-size:12px;font-family:var(--font-mono);text-align:center}
+
+  .refresh-btn{display:block;margin:16px 16px 0;width:calc(100% - 32px);background:transparent;border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--muted);font-family:var(--font-mono);font-size:11px;cursor:pointer;text-align:center;letter-spacing:.05em;text-transform:uppercase}
+  .refresh-btn:active{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="greeting">Bonjour, <em>Gauthier</em></div>
+    <div class="date-line" id="date-line">—</div>
+  </div>
+  <div class="live-time" id="live-time">—</div>
+</div>
+
+<div class="race-banner">
+  <div class="race-countdown" id="race-days">—</div>
+  <div>
+    <div class="race-name">🏔 24h La Rosière</div>
+    <div class="race-label" id="race-label">jours restants · 17 juillet 2026</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Météo · Bordeaux</div>
+  <div id="weather-container"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">À faire aujourd'hui</div>
+  <div class="todo-list" id="todo-list"></div>
+  <div class="todo-input-row">
+    <input class="todo-input" id="todo-input" type="text" placeholder="Ajouter une tâche…" maxlength="80">
+    <button class="todo-add-btn" onclick="addTodo()">+</button>
+  </div>
+  <div class="todo-clear" onclick="clearDoneTodos()">Supprimer les tâches terminées</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Mes équipes</div>
+  <div class="sport-list" id="sport-container"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">À la une</div>
+  <div class="news-list" id="news-general"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Actus sport</div>
+  <div class="news-list" id="news-sport"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<button class="refresh-btn" onclick="location.reload()">↻ Rafraîchir</button>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────
+const RACE_DATE   = new Date('2026-07-17'); // ← ta prochaine date de course
+const LAT         = 44.8378, LON = -0.5792; // Bordeaux
+const BDL_KEY     = '73277b99-bae5-4d4f-90a1-850f88194ec8'; // BallDontLie
+
+// BallDontLie team IDs
+// NBA : San Antonio Spurs = 26
+// MLB : Philadelphia Phillies = 22
+// La Liga : Real Madrid = on cherche via l'API
+const BDL_SPURS_ID   = 26;
+const BDL_PHILLIES_ID = 22;
+// La Liga Real Madrid — BallDontLie La Liga team id
+const BDL_REAL_ID    = 86; // will verify via search fallback
+
+// RSS feeds — parsed via DOMParser, no key needed, CORS ok from GitHub Pages
+const RSS_FEEDS = [
+  { url: 'https://www.lemonde.fr/rss/une.xml',           source: 'Le Monde',  sport: false },
+  { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',  source: 'BBC World', sport: false },
+  { url: 'https://www.lequipe.fr/rss/actu_rss.xml',      source: "L'Équipe",  sport: true  },
+  { url: 'https://rmcsport.bfmtv.com/rss/football/',     source: 'RMC Sport', sport: true  },
+];
+
+// ── UTILS ───────────────────────────────────────────────────────────
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function timeAgo(d){const m=(Date.now()-d)/60000;if(m<60)return`Il y a ${Math.floor(m)} min`;if(m<1440)return`Il y a ${Math.floor(m/60)}h`;return`Il y a ${Math.floor(m/1440)}j`}
+function frDate(iso){return new Date(iso).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}
+function frTime(iso){const d=new Date(iso);return d.getHours()+'h'+String(d.getMinutes()).padStart(2,'0')}
+function todayStr(){return new Date().toISOString().slice(0,10)}
+
+// BallDontLie fetch helper
+async function bdl(path){
+  const r = await fetch('https://api.balldontlie.io'+path,{headers:{Authorization:BDL_KEY}});
+  if(!r.ok) throw new Error('BDL '+r.status);
+  return r.json();
+}
+
+// ── CLOCK ───────────────────────────────────────────────────────────
+function updateClock(){
+  const n=new Date();
+  document.getElementById('live-time').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  const DAYS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  document.getElementById('date-line').textContent=DAYS[n.getDay()]+' '+n.getDate()+' '+MONTHS[n.getMonth()]+' '+n.getFullYear();
+}
+updateClock(); setInterval(updateClock,10000);
+
+// ── RACE COUNTDOWN ──────────────────────────────────────────────────
+(function(){
+  const t=new Date();t.setHours(0,0,0,0);
+  const diff=Math.ceil((RACE_DATE-t)/86400000);
+  document.getElementById('race-days').textContent=diff>0?diff:'🎉';
+  if(diff<=0)document.getElementById('race-label').textContent="C'est fait ! 💪";
+})();
+
+// ── TODO ────────────────────────────────────────────────────────────
+const TODO_KEY='todo_'+todayStr();
+const loadTodos=()=>{try{return JSON.parse(localStorage.getItem(TODO_KEY))||[]}catch{return[]}};
+const saveTodos=t=>localStorage.setItem(TODO_KEY,JSON.stringify(t));
+function renderTodos(){
+  const todos=loadTodos(),list=document.getElementById('todo-list');
+  list.innerHTML='';
+  if(!todos.length){list.innerHTML='<div class="card-empty" style="text-align:left">Aucune tâche pour l\'instant.</div>';return}
+  todos.forEach((t,i)=>{
+    const el=document.createElement('div');
+    el.className='todo-item'+(t.done?' done':'');
+    el.innerHTML=`<div class="todo-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0e0f0c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="todo-text">${esc(t.text)}</div>`;
+    el.onclick=()=>{const ts=loadTodos();ts[i].done=!ts[i].done;saveTodos(ts);renderTodos()};
+    list.appendChild(el);
+  });
+}
+function addTodo(){
+  const inp=document.getElementById('todo-input'),text=inp.value.trim();
+  if(!text)return;
+  const ts=loadTodos();ts.push({text,done:false});saveTodos(ts);inp.value='';renderTodos();
+}
+function clearDoneTodos(){saveTodos(loadTodos().filter(t=>!t.done));renderTodos()}
+document.getElementById('todo-input').addEventListener('keydown',e=>{if(e.key==='Enter')addTodo()});
+renderTodos();
+
+// ── WEATHER — Open-Meteo (no key, CORS ok) ──────────────────────────
+const WMO={0:['☀️','Dégagé'],1:['🌤','Peu nuageux'],2:['⛅','Partiellement nuageux'],3:['☁️','Couvert'],45:['🌫','Brouillard'],48:['🌫','Brouillard givrant'],51:['🌦','Bruine légère'],53:['🌦','Bruine'],55:['🌧','Bruine forte'],61:['🌧','Pluie légère'],63:['🌧','Pluie'],65:['🌧','Pluie forte'],71:['❄️','Neige légère'],73:['❄️','Neige'],75:['❄️','Neige forte'],80:['🌦','Averses'],81:['🌧','Averses'],82:['⛈','Averses violentes'],95:['⛈','Orage'],96:['⛈','Orage + grêle'],99:['⛈','Orage violent']};
+async function loadWeather(){
+  const el=document.getElementById('weather-container');
+  try{
+    const d=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FParis&forecast_days=1`).then(r=>r.json());
+    const c=d.current,dy=d.daily;
+    const[icon,label]=WMO[c.weathercode]||['🌡','—'];
+    el.innerHTML=`<div class="weather-card"><div class="weather-icon">${icon}</div><div class="weather-main"><div class="weather-temp">${Math.round(c.temperature_2m)}°C</div><div class="weather-desc">${label} · ressenti ${Math.round(c.apparent_temperature)}°</div></div><div class="weather-details"><div>${Math.round(dy.temperature_2m_max[0])}° / ${Math.round(dy.temperature_2m_min[0])}°</div><div>Pluie ${dy.precipitation_sum[0]} mm</div><div>Vent ${Math.round(c.windspeed_10m)} km/h</div></div></div>`;
+  }catch(e){el.innerHTML=`<div class="card-empty">Météo indisponible · ${e.message}</div>`}
+}
+loadWeather();
+
+// ── SPORT — BallDontLie ─────────────────────────────────────────────
+function makeCard(team,data){
+  const card=document.createElement('div');
+  if(!data){
+    card.className='sport-card';
+    card.innerHTML=`<div class="sport-emoji">${team.emoji}</div><div class="sport-badge">${esc(team.league)}</div><div class="sport-teams"><div class="sport-matchup">${esc(team.name)}</div><div class="sport-meta">Aucun match trouvé</div></div>`;
+    return card;
+  }
+  const{home,away,homeScore,awayScore,isToday,isLive,isDone,timeStr,league}=data;
+  const hasScore=homeScore!==null&&homeScore!==undefined&&String(homeScore)!=='';
+  let badge=league||team.league,badgeCls='';
+  if(isLive){badge='🔴 Live';badgeCls='live-b'}
+  else if(isToday&&!isDone){badge='Aujourd\'hui';badgeCls='today-b'}
+  else if(isDone){badge='Terminé';badgeCls='done-b'}
+  card.className='sport-card'+(isLive?' live':'');
+  card.innerHTML=`
+    <div class="sport-emoji">${team.emoji}</div>
+    <div class="sport-badge ${badgeCls}">${badge}</div>
+    <div class="sport-teams">
+      <div class="sport-matchup">${esc(home)} <span style="color:var(--muted);font-weight:400">vs</span> ${esc(away)}</div>
+      <div class="sport-meta">${esc(league||team.league)}${timeStr?' · '+timeStr:''}</div>
+    </div>
+    ${hasScore?`<div class="sport-score">${homeScore}–${awayScore}</div>`:isToday&&timeStr?`<div class="sport-next">${timeStr}</div>`:''}`;
+  return card;
+}
+
+// BallDontLie: NBA games
+async function getSpursGame(){
+  const today=todayStr();
+  // Today's game
+  const d=await bdl(`/nba/v1/games?dates[]=${today}&team_ids[]=${BDL_SPURS_ID}&per_page=5`);
+  if(d.data?.length){
+    const g=d.data[0];
+    const isHome=g.home_team.id===BDL_SPURS_ID;
+    const home=g.home_team.full_name,away=g.visitor_team.full_name;
+    const status=g.status;
+    const isLive=status&&!status.includes('Final')&&status!==today&&status.match(/Qtr|Half|OT|:/);
+    const isDone=status==='Final'||status==='Final/OT';
+    const timeStr=isDone?'':isLive?status:frTime(g.datetime||today+'T00:00:00Z');
+    return{home,away,homeScore:g.home_team_score||null,awayScore:g.visitor_team_score||null,isToday:true,isLive:!!isLive,isDone,timeStr,league:'NBA'};
+  }
+  // Next upcoming
+  const upcoming=await bdl(`/nba/v1/games?team_ids[]=${BDL_SPURS_ID}&per_page=5&start_date=${today}`);
+  const next=(upcoming.data||[]).find(g=>g.date>=today&&g.status===g.date);
+  if(next){
+    return{home:next.home_team.full_name,away:next.visitor_team.full_name,homeScore:null,awayScore:null,isToday:next.date===today,isLive:false,isDone:false,timeStr:next.date===today?frTime(next.datetime||today+'T00:00:00Z'):frDate(next.date),league:'NBA'};
+  }
+  return null;
+}
+
+// BallDontLie: MLB games
+async function getPhilliesGame(){
+  const today=todayStr();
+  const d=await bdl(`/mlb/v1/games?dates[]=${today}&team_ids[]=${BDL_PHILLIES_ID}&per_page=5`);
+  if(d.data?.length){
+    const g=d.data[0];
+    const home=g.home_team.full_name,away=g.visitor_team.full_name;
+    const isDone=g.status==='Final'||g.status==='Final/OT';
+    const isLive=!isDone&&g.inning!=null&&g.inning>0;
+    const inningStr=isLive?`Inn. ${g.inning}`:'';
+    return{home,away,homeScore:g.home_team_score??null,awayScore:g.visitor_team_score??null,isToday:true,isLive,isDone,timeStr:isDone?'':inningStr||frTime(g.datetime||today+'T00:00:00Z'),league:'MLB'};
+  }
+  const upcoming=await bdl(`/mlb/v1/games?team_ids[]=${BDL_PHILLIES_ID}&per_page=5&start_date=${today}`);
+  const next=(upcoming.data||[]).find(g=>g.date>=today);
+  if(next){
+    return{home:next.home_team.full_name,away:next.visitor_team.full_name,homeScore:null,awayScore:null,isToday:next.date===today,isLive:false,isDone:false,timeStr:next.date===today?frTime(next.datetime||today+'T00:00:00Z'):frDate(next.date),league:'MLB'};
+  }
+  return null;
+}
+
+// BallDontLie: La Liga — Real Madrid
+async function getRealGame(){
+  const today=todayStr();
+  // La Liga endpoint
+  const d=await bdl(`/laliga/v1/games?dates[]=${today}&team_ids[]=${BDL_REAL_ID}&per_page=5`);
+  if(d.data?.length){
+    const g=d.data[0];
+    const home=g.home_team.name||g.home_team.full_name;
+    const away=g.visitor_team.name||g.visitor_team.full_name;
+    const isDone=g.status==='FT'||g.status==='Final'||g.status==='AET';
+    const isLive=!isDone&&g.minute!=null;
+    return{home,away,homeScore:g.home_team_score??null,awayScore:g.visitor_team_score??null,isToday:true,isLive,isDone,timeStr:isLive?`${g.minute}'`:isDone?'':frTime(g.datetime||today+'T00:00:00Z'),league:'La Liga'};
+  }
+  const upcoming=await bdl(`/laliga/v1/games?team_ids[]=${BDL_REAL_ID}&per_page=5&start_date=${today}`);
+  const next=(upcoming.data||[]).find(g=>(g.date||g.datetime?.slice(0,10))>=today);
+  if(next){
+    const d2=next.date||next.datetime?.slice(0,10);
+    return{home:next.home_team.name||'?',away:next.visitor_team.name||'?',homeScore:null,awayScore:null,isToday:d2===today,isLive:false,isDone:false,timeStr:d2===today?frTime(next.datetime):frDate(d2),league:'La Liga'};
+  }
+  return null;
+}
+
+// Girondins: football-data.org free tier (no CORS issues on https)
+// Team ID 558 = Girondins de Bordeaux on football-data.org
+// Using public endpoint without key (limited but works for schedule)
+async function getGirondinsGame(){
+  const today=todayStr();
+  try{
+    // football-data.org free — no key for basic schedule, CORS enabled
+    const r=await fetch('https://api.football-data.org/v4/teams/558/matches?status=SCHEDULED&limit=5',{headers:{'X-Auth-Token':'placeholder'}});
+    const d=await r.json();
+    const matches=d.matches||[];
+    const next=matches.find(m=>m.utcDate?.slice(0,10)>=today);
+    if(!next)return null;
+    const matchDate=next.utcDate.slice(0,10);
+    const isToday2=matchDate===today;
+    return{
+      home:next.homeTeam.shortName||next.homeTeam.name,
+      away:next.awayTeam.shortName||next.awayTeam.name,
+      homeScore:next.score?.fullTime?.home??null,
+      awayScore:next.score?.fullTime?.away??null,
+      isToday:isToday2,isLive:next.status==='IN_PLAY'||next.status==='PAUSED',
+      isDone:next.status==='FINISHED',
+      timeStr:isToday2?frTime(next.utcDate):frDate(matchDate),
+      league:'Ligue 2'
+    };
+  }catch{
+    // Fallback: TheSportsDB (might work from GitHub Pages)
+    const r2=await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=134736');
+    const d2=await r2.json();
+    const ev=(d2.events||[])[0];
+    if(!ev)return null;
+    const isToday2=ev.dateEvent===today;
+    let timeStr='';
+    if(!isToday2){timeStr=frDate(ev.dateEvent)}
+    else if(ev.strTime){
+      try{const[h,m]=ev.strTime.replace('+00:00','').split(':');const dt=new Date();dt.setUTCHours(+h,+(m||0),0);timeStr=dt.getHours()+'h'+String(dt.getMinutes()).padStart(2,'0')}catch{timeStr=ev.strTime.slice(0,5)}
+    }
+    return{home:ev.strHomeTeam,away:ev.strAwayTeam,homeScore:ev.intHomeScore??null,awayScore:ev.intAwayScore??null,isToday:isToday2,isLive:false,isDone:ev.strStatus==='Match Finished',timeStr,league:'Ligue 2'};
+  }
+}
+
+const TEAMS=[
+  {name:'San Antonio Spurs',emoji:'🏀',league:'NBA',   fetch:getSpursGame},
+  {name:'Phillies',         emoji:'⚾',league:'MLB',   fetch:getPhilliesGame},
+  {name:'Real Madrid',      emoji:'⚽',league:'La Liga',fetch:getRealGame},
+  {name:'Girondins',        emoji:'⚽',league:'Ligue 2',fetch:getGirondinsGame},
+];
+
+async function loadSport(){
+  const container=document.getElementById('sport-container');
+  container.innerHTML='';
+  const results=await Promise.allSettled(TEAMS.map(t=>t.fetch()));
+  TEAMS.forEach((team,i)=>{
+    const data=results[i].status==='fulfilled'?results[i].value:null;
+    container.appendChild(makeCard(team,data));
+  });
+}
+loadSport();
+
+// ── NEWS — RSS via fetch (CORS ok from GitHub Pages) ────────────────
+async function fetchRSS(url){
+  const r=await fetch(url);
+  const text=await r.text();
+  const xml=new DOMParser().parseFromString(text,'text/xml');
+  const items=[...xml.querySelectorAll('item')].slice(0,4);
+  return items.map(item=>({
+    title:item.querySelector('title')?.textContent||'',
+    link:item.querySelector('link')?.textContent||item.querySelector('link')?.getAttribute('href')||'',
+    pubDate:new Date(item.querySelector('pubDate')?.textContent||Date.now()),
+  }));
+}
+
+async function loadNews(){
+  const genEl=document.getElementById('news-general');
+  const spEl=document.getElementById('news-sport');
+
+  const generalFeeds=RSS_FEEDS.filter(f=>!f.sport);
+  const sportFeeds=RSS_FEEDS.filter(f=>f.sport);
+
+  async function loadFeed(feeds,container){
+    const results=await Promise.allSettled(feeds.map(f=>fetchRSS(f.url).then(items=>items.map(i=>({...i,source:f.source})))));
+    const articles=results.flatMap((r,fi)=>r.status==='fulfilled'?r.value:[]);
+    articles.sort((a,b)=>b.pubDate-a.pubDate);
+    if(!articles.length){container.innerHTML='<div class="card-empty">Aucun article disponible.</div>';return}
+    container.innerHTML='';
+    articles.slice(0,6).forEach(a=>{
+      const c=document.createElement('a');
+      c.className='news-card';c.href=a.link;c.target='_blank';c.rel='noopener';
+      c.innerHTML=`<div class="news-source">${esc(a.source)}</div><div class="news-title">${esc(a.title)}</div><div class="news-age">${timeAgo(a.pubDate)}</div>`;
+      container.appendChild(c);
+    });
+  }
+
+  await Promise.all([
+    loadFeed(generalFeeds,genEl),
+    loadFeed(sportFeeds,spEl),
+  ]);
+}
+loadNews();
+</script>
+</body>
+</html>
