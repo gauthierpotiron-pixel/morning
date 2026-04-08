@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Morning">
+<title>Morning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f0c; --surface: #161714; --surface2: #1e1f1b;
+    --border: rgba(255,255,255,0.07); --text: #e8e6df; --muted: #7a7870;
+    --accent: #c8f060; --accent2: #f0b840; --accent3: #60c8f0; --danger: #f06060;
+    --radius: 14px;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:14px; min-height:100dvh; padding:0 0 60px; }
+
+  .header { padding:52px 20px 20px; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--border); position:relative; }
+  .header::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 0%,rgba(200,240,96,.07),transparent 60%); pointer-events:none; }
+  .greeting { font-family:var(--font-display); font-size:32px; line-height:1.1; }
+  .greeting em { font-style:italic; color:var(--accent); }
+  .date-line { font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:4px; letter-spacing:.05em; text-transform:uppercase; }
+  .live-time { font-family:var(--font-mono); font-size:28px; font-weight:500; letter-spacing:-.02em; }
+
+  .race-banner { margin:12px 16px; background:linear-gradient(135deg,rgba(200,240,96,.08),rgba(240,184,64,.06)); border:1px solid rgba(200,240,96,.2); border-radius:var(--radius); padding:12px 16px; display:flex; align-items:center; gap:12px; }
+  .race-countdown { font-family:var(--font-mono); font-size:32px; font-weight:500; color:var(--accent); line-height:1; min-width:52px; }
+  .race-name { font-size:13px; font-weight:600; }
+  .race-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; line-height:1.6; }
+
+  .section { margin:12px 16px 0; }
+  .section-title { font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-bottom:8px; padding-left:2px; }
+
+  .weather-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .weather-icon { font-size:36px; line-height:1; }
+  .weather-main { flex:1; }
+  .weather-temp { font-family:var(--font-display); font-size:28px; line-height:1; }
+  .weather-desc { font-size:12px; color:var(--muted); margin-top:2px; }
+  .weather-details { text-align:right; font-family:var(--font-mono); font-size:11px; color:var(--muted); line-height:1.8; }
+
+  .todo-list { display:flex; flex-direction:column; gap:6px; }
+  .todo-item { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 14px; display:flex; align-items:center; gap:12px; cursor:pointer; -webkit-user-select:none; user-select:none; }
+  .todo-item.done { opacity:.45; }
+  .todo-item.done .todo-text { text-decoration:line-through; }
+  .todo-check { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--muted); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:background .15s,border-color .15s; }
+  .todo-item.done .todo-check { background:var(--accent); border-color:var(--accent); }
+  .todo-check svg { display:none; }
+  .todo-item.done .todo-check svg { display:block; }
+  .todo-text { font-size:14px; flex:1; }
+  .todo-input-row { display:flex; gap:8px; margin-top:6px; }
+  .todo-input { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-family:var(--font-body); font-size:14px; outline:none; }
+  .todo-input:focus { border-color:rgba(200,240,96,.3); }
+  .todo-input::placeholder { color:var(--muted); }
+  .todo-add-btn { background:var(--accent); color:#0e0f0c; border:none; border-radius:10px; padding:10px 16px; font-family:var(--font-body); font-size:14px; font-weight:600; cursor:pointer; }
+  .todo-clear { font-family:var(--font-mono); font-size:10px; color:var(--muted); text-align:right; margin-top:6px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+
+  .sport-list { display:flex; flex-direction:column; gap:6px; }
+  .sport-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; display:flex; align-items:center; gap:10px; position:relative; overflow:hidden; }
+  .sport-card.live { border-color:rgba(240,96,96,.35); }
+  .sport-card.live::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--danger); }
+  .sport-emoji { font-size:20px; flex-shrink:0; width:28px; text-align:center; }
+  .sport-badge { font-family:var(--font-mono); font-size:9px; text-transform:uppercase; letter-spacing:.08em; padding:3px 6px; border-radius:4px; background:var(--surface2); color:var(--muted); white-space:nowrap; flex-shrink:0; }
+  .sport-badge.live-b { background:rgba(240,96,96,.15); color:var(--danger); }
+  .sport-badge.today-b { background:rgba(200,240,96,.1); color:var(--accent); }
+  .sport-teams { flex:1; min-width:0; }
+  .sport-matchup { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sport-meta { font-size:11px; color:var(--muted); margin-top:2px; font-family:var(--font-mono); }
+  .sport-score { font-family:var(--font-mono); font-size:16px; font-weight:500; color:var(--accent2); white-space:nowrap; }
+  .sport-time-r { font-family:var(--font-mono); font-size:13px; color:var(--muted); white-space:nowrap; }
+
+  .news-list { display:flex; flex-direction:column; gap:6px; }
+  .news-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; cursor:pointer; text-decoration:none; display:block; }
+  .news-source { font-family:var(--font-mono); font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent3); margin-bottom:4px; }
+  .news-title { font-size:13px; font-weight:600; color:var(--text); line-height:1.4; }
+  .news-age { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:4px; }
+
+  .card-empty { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; color:var(--muted); font-size:12px; font-family:var(--font-mono); text-align:center; }
+
+  .refresh-btn { display:block; margin:16px 16px 0; width:calc(100% - 32px); background:transparent; border:1px solid var(--border); border-radius:10px; padding:12px; color:var(--muted); font-family:var(--font-mono); font-size:11px; cursor:pointer; text-align:center; letter-spacing:.05em; text-transform:uppercase; }
+  .refresh-btn:active { border-color:var(--accent); color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="greeting">Bonjour, <em>Gauthier</em></div>
+    <div class="date-line" id="date-line">—</div>
+  </div>
+  <div class="live-time" id="live-time">—</div>
+</div>
+
+<div class="race-banner">
+  <div class="race-countdown" id="race-days">—</div>
+  <div>
+    <div class="race-name">🏔 24h La Rosière</div>
+    <div class="race-label">jours restants · 17 juillet 2025</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Météo · Bordeaux</div>
+  <div id="weather-container"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">À faire aujourd'hui</div>
+  <div class="todo-list" id="todo-list"></div>
+  <div class="todo-input-row">
+    <input class="todo-input" id="todo-input" type="text" placeholder="Ajouter une tâche…" maxlength="80">
+    <button class="todo-add-btn" onclick="addTodo()">+</button>
+  </div>
+  <div class="todo-clear" onclick="clearDoneTodos()">Supprimer les tâches terminées</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Mes équipes</div>
+  <div class="sport-list" id="sport-container"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">À la une · France &amp; Monde</div>
+  <div class="news-list" id="news-general"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Actus sport</div>
+  <div class="news-list" id="news-sport"><div class="card-empty">Chargement…</div></div>
+</div>
+
+<button class="refresh-btn" onclick="location.reload()">↻ Rafraîchir</button>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const RACE_DATE = new Date('2025-07-17');
+const LAT = 44.8378, LON = -0.5792;
+const GNEWS_KEY = 'a6adf25e2884a5d39e601eaa0fec1336';
+
+// ALL requests go through this proxy — the only way to avoid CORS from file://
+async function pf(url) {
+  const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
+  const w = await r.json();
+  if (!w.contents) throw new Error('Proxy vide');
+  return JSON.parse(w.contents);
+}
+
+// ── CLOCK ───────────────────────────────────────────────────────
+function updateClock() {
+  const n = new Date();
+  document.getElementById('live-time').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+  const DAYS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  document.getElementById('date-line').textContent =
+    DAYS[n.getDay()] + ' ' + n.getDate() + ' ' + MONTHS[n.getMonth()] + ' ' + n.getFullYear();
+}
+updateClock(); setInterval(updateClock, 10000);
+
+// ── RACE COUNTDOWN ──────────────────────────────────────────────
+(function() {
+  const t = new Date(); t.setHours(0,0,0,0);
+  document.getElementById('race-days').textContent =
+    Math.max(0, Math.ceil((RACE_DATE - t) / 86400000)) || '🎉';
+})();
+
+// ── TODO ────────────────────────────────────────────────────────
+const TODO_KEY = 'todo_' + new Date().toISOString().slice(0,10);
+const loadTodos = () => { try { return JSON.parse(localStorage.getItem(TODO_KEY))||[]; } catch { return []; } };
+const saveTodos = t => localStorage.setItem(TODO_KEY, JSON.stringify(t));
+function renderTodos() {
+  const todos = loadTodos(), list = document.getElementById('todo-list');
+  list.innerHTML = '';
+  if (!todos.length) { list.innerHTML = '<div class="card-empty" style="text-align:left">Aucune tâche pour l\'instant.</div>'; return; }
+  todos.forEach((t,i) => {
+    const el = document.createElement('div');
+    el.className = 'todo-item' + (t.done ? ' done' : '');
+    el.innerHTML = `<div class="todo-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0e0f0c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="todo-text">${esc(t.text)}</div>`;
+    el.onclick = () => { const ts=loadTodos(); ts[i].done=!ts[i].done; saveTodos(ts); renderTodos(); };
+    list.appendChild(el);
+  });
+}
+function addTodo() {
+  const inp = document.getElementById('todo-input'), text = inp.value.trim();
+  if (!text) return;
+  const ts = loadTodos(); ts.push({text,done:false}); saveTodos(ts); inp.value=''; renderTodos();
+}
+function clearDoneTodos() { saveTodos(loadTodos().filter(t=>!t.done)); renderTodos(); }
+document.getElementById('todo-input').addEventListener('keydown', e => { if(e.key==='Enter') addTodo(); });
+renderTodos();
+
+// ── WEATHER ─────────────────────────────────────────────────────
+const WMO = {0:['☀️','Dégagé'],1:['🌤','Peu nuageux'],2:['⛅','Partiellement nuageux'],3:['☁️','Couvert'],45:['🌫','Brouillard'],48:['🌫','Brouillard givrant'],51:['🌦','Bruine légère'],53:['🌦','Bruine'],55:['🌧','Bruine forte'],61:['🌧','Pluie légère'],63:['🌧','Pluie'],65:['🌧','Pluie forte'],71:['❄️','Neige légère'],73:['❄️','Neige'],75:['❄️','Neige forte'],80:['🌦','Averses légères'],81:['🌧','Averses'],82:['⛈','Averses violentes'],95:['⛈','Orage'],96:['⛈','Orage + grêle'],99:['⛈','Orage violent']};
+async function loadWeather() {
+  const el = document.getElementById('weather-container');
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FParis&forecast_days=1`;
+    const d = await pf(url);
+    const c = d.current, dy = d.daily;
+    const [icon, label] = WMO[c.weathercode] || ['🌡','—'];
+    el.innerHTML = `<div class="weather-card">
+      <div class="weather-icon">${icon}</div>
+      <div class="weather-main">
+        <div class="weather-temp">${Math.round(c.temperature_2m)}°C</div>
+        <div class="weather-desc">${label} · ressenti ${Math.round(c.apparent_temperature)}°</div>
+      </div>
+      <div class="weather-details">
+        <div>${Math.round(dy.temperature_2m_max[0])}° / ${Math.round(dy.temperature_2m_min[0])}°</div>
+        <div>Pluie ${dy.precipitation_sum[0]} mm</div>
+        <div>Vent ${Math.round(c.windspeed_10m)} km/h</div>
+      </div>
+    </div>`;
+  } catch(e) { el.innerHTML = `<div class="card-empty">Météo indisponible · ${e.message}</div>`; }
+}
+loadWeather();
+
+// ── SPORT ────────────────────────────────────────────────────────
+// ESPN IDs: Phillies=22, Spurs=26(san-antonio-spurs), Real Madrid=86
+// TheSportsDB IDs: Girondins=134736
+// ESPN scoreboard + team schedule, all via proxy
+
+const TEAMS = [
+  { name:'Phillies',           emoji:'⚾', league:'MLB',     type:'espn', sport:'baseball', espleague:'mlb',   espnId:'22'  },
+  { name:'San Antonio Spurs',  emoji:'🏀', league:'NBA',     type:'espn', sport:'basketball',espleague:'nba',  espnId:'26'  },
+  { name:'Girondins Bordeaux', emoji:'⚽', league:'Ligue 2', type:'sdb',  sdbId:'134736' },
+  { name:'Real Madrid',        emoji:'⚽', league:'La Liga', type:'espn', sport:'soccer',   espleague:'esp.1', espnId:'86'  },
+];
+
+function localTime(utcTimeStr, dateStr) {
+  // utcTimeStr like "23:00:00+00:00" or "22:00:00Z", dateStr "2025-04-07"
+  try {
+    const dt = new Date(dateStr + 'T' + utcTimeStr.slice(0,8) + 'Z');
+    return dt.getHours() + 'h' + String(dt.getMinutes()).padStart(2,'0');
+  } catch { return utcTimeStr; }
+}
+
+function frDate(dateStr) {
+  return new Date(dateStr+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+}
+
+async function fetchESPN(team) {
+  const todayStr = new Date().toISOString().slice(0,10);
+  const dateCode = todayStr.replace(/-/g,'');
+  const base = `https://site.api.espn.com/apis/site/v2/sports/${team.sport}/${team.espleague}`;
+
+  // 1. Check today's scoreboard
+  const sb = await pf(`${base}/scoreboard?dates=${dateCode}`);
+  const todayEv = (sb.events||[]).find(ev =>
+    ev.competitions?.[0]?.competitors?.some(c => c.id === team.espnId)
+  );
+
+  if (todayEv) {
+    const comp = todayEv.competitions[0];
+    const home = comp.competitors.find(c=>c.homeAway==='home');
+    const away = comp.competitors.find(c=>c.homeAway==='away');
+    const state = todayEv.status?.type?.state;
+    const detail = todayEv.status?.type?.shortDetail||'';
+    let timeStr = '';
+    if (state === 'pre') {
+      const dt = new Date(todayEv.date);
+      timeStr = dt.getHours()+'h'+String(dt.getMinutes()).padStart(2,'0');
+    }
+    return {
+      home: home?.team?.shortDisplayName||home?.team?.abbreviation||'?',
+      away: away?.team?.shortDisplayName||away?.team?.abbreviation||'?',
+      homeScore: home?.score, awayScore: away?.score,
+      isToday:true, isLive:state==='in', isDone:state==='post',
+      timeStr, detail
+    };
+  }
+
+  // 2. Team schedule — next upcoming
+  const sch = await pf(`${base}/teams/${team.espnId}/schedule`);
+  const todayFull = todayStr;
+  const next = (sch.events||[]).find(ev => (ev.date||'').slice(0,10) >= todayFull && ev.competitions?.[0]?.competitors);
+  if (next) {
+    const comp = next.competitions[0];
+    const home = comp.competitors.find(c=>c.homeAway==='home');
+    const away = comp.competitors.find(c=>c.homeAway==='away');
+    const evDate = next.date.slice(0,10);
+    const isToday = evDate === todayFull;
+    let timeStr = '';
+    if (isToday) {
+      const dt = new Date(next.date);
+      timeStr = dt.getHours()+'h'+String(dt.getMinutes()).padStart(2,'0');
+    } else {
+      timeStr = frDate(evDate);
+    }
+    return {
+      home: home?.team?.shortDisplayName||home?.team?.abbreviation||'?',
+      away: away?.team?.shortDisplayName||away?.team?.abbreviation||'?',
+      isToday, isLive:false, isDone:false, timeStr, detail:''
+    };
+  }
+  return null;
+}
+
+async function fetchSDB(team) {
+  const todayStr = new Date().toISOString().slice(0,10);
+  // Try eventsnext (upcoming)
+  const d = await pf(`https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=${team.sdbId}`);
+  const ev = (d.events||[])[0];
+  if (!ev) return null;
+  const isToday = ev.dateEvent === todayStr;
+  let timeStr = '';
+  if (!isToday) {
+    timeStr = frDate(ev.dateEvent);
+  } else if (ev.strTime) {
+    timeStr = localTime(ev.strTime, ev.dateEvent);
+  }
+  const hasScore = ev.intHomeScore !== null && ev.intHomeScore !== '' && ev.intHomeScore !== undefined;
+  return {
+    home: ev.strHomeTeam, away: ev.strAwayTeam,
+    homeScore: ev.intHomeScore, awayScore: ev.intAwayScore,
+    hasScore,
+    isToday, isLive: false, isDone: ev.strStatus === 'Match Finished',
+    timeStr, detail: '', league: ev.strLeague
+  };
+}
+
+async function loadSport() {
+  const container = document.getElementById('sport-container');
+  container.innerHTML = '';
+
+  // Launch all fetches in parallel, preserve order
+  const results = await Promise.allSettled(
+    TEAMS.map(team => team.type==='espn' ? fetchESPN(team) : fetchSDB(team))
+  );
+
+  TEAMS.forEach((team, i) => {
+    const data = results[i].status === 'fulfilled' ? results[i].value : null;
+    const card = document.createElement('div');
+
+    if (!data) {
+      card.className = 'sport-card';
+      card.innerHTML = `<div class="sport-emoji">${team.emoji}</div><div class="sport-badge">${esc(team.league)}</div><div class="sport-teams"><div class="sport-matchup">${esc(team.name)}</div><div class="sport-meta">Données indisponibles</div></div>`;
+      container.appendChild(card); return;
+    }
+
+    const { home, away, homeScore, awayScore, hasScore, isToday, isLive, isDone, timeStr, detail } = data;
+    const scoreOk = hasScore !== undefined ? hasScore : (homeScore !== null && homeScore !== undefined && homeScore !== '');
+
+    let badge = team.league, badgeCls = '';
+    if (isLive)              { badge='🔴 Live';       badgeCls='live-b'; }
+    else if (isToday&&!isDone) { badge='Aujourd\'hui'; badgeCls='today-b'; }
+    else if (isDone)          { badge='Terminé'; }
+
+    card.className = 'sport-card' + (isLive ? ' live' : '');
+    card.innerHTML = `
+      <div class="sport-emoji">${team.emoji}</div>
+      <div class="sport-badge ${badgeCls}">${badge}</div>
+      <div class="sport-teams">
+        <div class="sport-matchup">${esc(home)} <span style="color:var(--muted);font-weight:400">vs</span> ${esc(away)}</div>
+        <div class="sport-meta">${esc(team.league)}${timeStr?' · '+timeStr:''}${detail?' · '+detail:''}</div>
+      </div>
+      ${scoreOk ? `<div class="sport-score">${homeScore}–${awayScore}</div>`
+        : timeStr ? `<div class="sport-time-r">${isToday?timeStr:''}</div>` : ''}`;
+    container.appendChild(card);
+  });
+}
+loadSport();
+
+// ── NEWS ─────────────────────────────────────────────────────────
+function renderArticles(el, articles) {
+  if (!articles?.length) { el.innerHTML='<div class="card-empty">Aucun article.</div>'; return; }
+  el.innerHTML='';
+  articles.forEach(a => {
+    const c = document.createElement('a');
+    c.className='news-card'; c.href=a.url; c.target='_blank'; c.rel='noopener';
+    c.innerHTML=`<div class="news-source">${esc(a.source?.name||'—')}</div><div class="news-title">${esc(a.title)}</div><div class="news-age">${timeAgo(new Date(a.publishedAt))}</div>`;
+    el.appendChild(c);
+  });
+}
+
+async function loadNews() {
+  const genEl = document.getElementById('news-general');
+  const spEl  = document.getElementById('news-sport');
+  const base  = `https://gnews.io/api/v4/top-headlines?lang=fr&apikey=${GNEWS_KEY}`;
+  try {
+    const [fr, world, sport] = await Promise.all([
+      pf(`${base}&country=fr&max=4`),
+      pf(`${base}&topic=world&max=3`),
+      pf(`${base}&topic=sports&max=5`),
+    ]);
+    const seen = new Set();
+    const general = [...(fr.articles||[]),...(world.articles||[])]
+      .filter(a=>{ if(seen.has(a.url)) return false; seen.add(a.url); return true; }).slice(0,6);
+    renderArticles(genEl, general);
+    renderArticles(spEl, (sport.articles||[]).slice(0,5));
+  } catch(e) {
+    genEl.innerHTML = `<div class="card-empty">News indisponibles · ${e.message}</div>`;
+    spEl.innerHTML  = '<div class="card-empty">Actus sport indisponibles.</div>';
+  }
+}
+loadNews();
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function timeAgo(d) { const m=(Date.now()-d)/60000; if(m<60) return `Il y a ${Math.floor(m)} min`; if(m<1440) return `Il y a ${Math.floor(m/60)}h`; return `Il y a ${Math.floor(m/1440)}j`; }
+</script>
+</body>
+</html>
